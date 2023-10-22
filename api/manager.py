@@ -1,9 +1,9 @@
 from django.contrib.auth.models import BaseUserManager
 from django.core.exceptions import ValidationError
+from django.db import transaction
 
 
 class CustomUserManager(BaseUserManager):
-
     def create_user(self, username, email, password=None):
         if not username or username is None:
             raise ValidationError("User must have username")
