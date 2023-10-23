@@ -95,9 +95,10 @@ JWT_AUTH = {
 
 WSGI_APPLICATION = 'LearnEnglish.wsgi.application'
 
-ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
-STATICFILES_DIRS = [BASE_DIR/'static',]
-STATIC_ROOT = BASE_DIR/'staticfiles'
+ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1']
+
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
 AUTH_USER_MODEL = 'api.User'
 
