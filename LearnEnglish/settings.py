@@ -15,6 +15,10 @@ from pathlib import Path
 from dotenv import load_dotenv, find_dotenv
 import pymysql
 
+import django
+from django.utils.translation import gettext
+django.utils.translation.ugettext = gettext
+
 
 pymysql.install_as_MySQLdb()
 
