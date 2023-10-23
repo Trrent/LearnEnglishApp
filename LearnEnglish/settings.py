@@ -77,11 +77,12 @@ TEMPLATES = [
 JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': timedelta(days=1),
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
-    # Modify the PayLoad function, take it from definition
     'JWT_RESPONSE_PAYLOAD_HANDLER': 'LearnEnglish.utils.jwt_response_payload_handler',
 }
 
 WSGI_APPLICATION = 'LearnEnglish.wsgi.application'
+
+ALLOWED_HOSTS = ['127.0.0.1', '.vercel.app']
 
 AUTH_USER_MODEL = 'api.User'
 
