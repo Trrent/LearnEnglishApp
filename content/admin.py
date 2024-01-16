@@ -11,7 +11,7 @@ class SerialAdmin(admin.ModelAdmin):
 
 @admin.register(Episode)
 class EpisodeAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title']
+    list_display = ['id', 'title', 'slug']
 
 
 class EpisodeInline(admin.StackedInline):
@@ -34,7 +34,7 @@ class ContentInline(admin.StackedInline):
 @admin.register(IText)
 class ITextAdmin(admin.ModelAdmin):
     list_display = ['id', 'rus']
-    inlines = [ContentInline]
+    # inlines = [ContentInline]
 
 
 @admin.register(IVideo)

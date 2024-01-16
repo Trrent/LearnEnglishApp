@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.utils.text import slugify
 
 import uuid
 
@@ -25,7 +26,7 @@ class Season(models.Model):
     id = models.CharField(default=uuid.uuid4, primary_key=True)
     title = models.CharField(max_length=200)
     serial = models.ForeignKey(Serial, on_delete=models.CASCADE, related_name='seasons')
-    slug = models.SlugField(max_length=200, unique=True)
+    slug = models.CharField(max_length=200, unique=True, blank=True)
     overview = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
 
@@ -35,14 +36,23 @@ class Season(models.Model):
     def __str__(self):
         return f"{self.serial.title} {self.title}"
 
+    def save(self, *args, **kwargs):
+        self.slug = slugify(f"{self.serial.title}-{self.title}")
+        super(Season, self).save(*args, **kwargs)
+
 
 class Episode(models.Model):
     id = models.CharField(default=uuid.uuid4, primary_key=True)
     season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name='episodes')
     title = models.CharField(max_length=200)
+    slug = models.CharField(max_length=200, unique=True, blank=True)
 
     def __str__(self):
         return f"{self.season.serial.title} ({self.season.title} {self.title})"
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(f"{self.season.serial.title}-{self.season.title}-{self.title}")
+        super(Episode, self).save(*args, **kwargs)
 
 
 class ItemBase(models.Model):
