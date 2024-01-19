@@ -1,9 +1,8 @@
 from rest_framework import serializers
-from .models import Serial, Season, Episode, Content, ItemBase, IText, IVideo, IQuiz
+from .models import Serial, Season, Episode, ItemBase, IText, IVideo, IQuiz
 
 
 class ItemBaseSerializer(serializers.Serializer):
-    id = serializers.UUIDField()
 
     class Meta:
         model = ItemBase
@@ -18,7 +17,6 @@ class ITextSerializer(ItemBaseSerializer, serializers.ModelSerializer):
 
 
 class EpisodeListSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField()
 
     class Meta:
         model = Episode
@@ -26,35 +24,33 @@ class EpisodeListSerializer(serializers.ModelSerializer):
 
 
 class EpisodeSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField()
     season = serializers.SlugRelatedField(
         read_only=True,
         slug_field='title'
     )
 
+    def create(self, validated_data):
+        return self
+
     class Meta:
         model = Season
-        fields = ['id', 'title', 'season']
+        fields = ['id', 'title', 'slug', 'season']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        data['content'] = {'itext': [],
-                           'ivideo': [],
-                           'iquiz': []}
+        data['serial'] = self.instance.season.serial.title
+        data['content'] = {}
         for content in self.instance.contents.all():
             if isinstance(content.item, IText):
-                data['content']['itext'] += [ITextSerializer(content.item).data]
+                data['content']['itext'] = data['content'].get('itext', []) + [ITextSerializer(content.item).data]
             elif isinstance(content.item, IVideo):
-                data['content']['ivideo'] += [ITextSerializer(content.item).data]
+                data['content']['ivideo'] = data['content'].get('ivideo', []) + [ITextSerializer(content.item).data]
             elif isinstance(content.item, IQuiz):
-                data['content']['iquiz'] += [ITextSerializer(content.item).data]
-            else:
-                raise Exception('Unexpected type of tagged object')
+                data['content']['iquiz'] = data['content'].get('iquiz', []) + [ITextSerializer(content.item).data]
         return data
 
 
 class SeasonListSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField()
 
     class Meta:
         model = Season
@@ -62,7 +58,6 @@ class SeasonListSerializer(serializers.ModelSerializer):
 
 
 class SeasonSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField()
     serial = serializers.SlugRelatedField(
         read_only=True,
         slug_field='title'
@@ -78,7 +73,6 @@ class SeasonSerializer(serializers.ModelSerializer):
 
 
 class SerialListSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField()
 
     class Meta:
         model = Serial
@@ -86,7 +80,6 @@ class SerialListSerializer(serializers.ModelSerializer):
 
 
 class SerialSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField()
     seasons = SeasonListSerializer(
         many=True,
         read_only=True,

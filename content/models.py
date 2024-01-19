@@ -11,9 +11,9 @@ def get_video_path(instance, filename):
 
 
 class Serial(models.Model):
-    id = models.CharField(default=uuid.uuid4, primary_key=True)
-    title = models.CharField(max_length=180, blank=False)
-    slug = models.SlugField(max_length=200, unique=True)
+    id = models.CharField(default=uuid.uuid4, primary_key=True, editable=False)
+    title = models.CharField(max_length=180, blank=False, unique=True)
+    slug = models.SlugField(max_length=200, blank=True)
 
     class Meta:
         ordering = ('title',)
@@ -21,12 +21,16 @@ class Serial(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.title)
+        super(Serial, self).save(*args, **kwargs)
+
 
 class Season(models.Model):
-    id = models.CharField(default=uuid.uuid4, primary_key=True)
+    id = models.CharField(default=uuid.uuid4, primary_key=True, editable=False)
     title = models.CharField(max_length=200)
     serial = models.ForeignKey(Serial, on_delete=models.CASCADE, related_name='seasons')
-    slug = models.CharField(max_length=200, unique=True, blank=True)
+    slug = models.CharField(max_length=200, blank=True)
     overview = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
 
@@ -42,10 +46,10 @@ class Season(models.Model):
 
 
 class Episode(models.Model):
-    id = models.CharField(default=uuid.uuid4, primary_key=True)
+    id = models.CharField(default=uuid.uuid4, primary_key=True, editable=False)
     season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name='episodes')
     title = models.CharField(max_length=200)
-    slug = models.CharField(max_length=200, unique=True, blank=True)
+    slug = models.CharField(max_length=200, blank=True)
 
     def __str__(self):
         return f"{self.season.serial.title} ({self.season.title} {self.title})"
@@ -56,11 +60,9 @@ class Episode(models.Model):
 
 
 class ItemBase(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-
-    # content = GenericRelation('Content')
 
     class Meta:
         abstract = True
@@ -95,7 +97,7 @@ class IVideo(ItemBase):
 
 
 class Video(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     quality = models.CharField(max_length=10)
     src = models.URLField()
     iVideo = models.ForeignKey(IVideo, on_delete=models.CASCADE, related_name='qualitySrc')
@@ -121,7 +123,7 @@ class Question(models.Model):
         ('select', 'select'),
     )
 
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     quiz_id = models.ForeignKey(IQuiz, on_delete=models.CASCADE, related_name='questions')
     type = models.CharField(max_length=20, choices=QUESTION_TYPE, default='quiz')
     score = models.IntegerField(blank=False, default=0)
@@ -130,7 +132,7 @@ class Question(models.Model):
 
 
 class Answer(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     quiz_id = models.ForeignKey(IQuiz, on_delete=models.CASCADE, related_name='answers')
     question_id = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='answers')
     content = models.CharField(max_length=250)
