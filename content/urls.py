@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import SerialDetailView, SerialListView, SeasonDetailView, EpisodeDetailView
+from .views import SerialDetailView, SerialListView, EpisodeDetailView, SeasonDetailView
 
 urlpatterns = [
     path('serials/', SerialListView.as_view(), name='serial_list'),
