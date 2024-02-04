@@ -21,9 +21,9 @@ class EpisodeInline(admin.StackedInline):
 
 @admin.register(Season)
 class SeasonAdmin(admin.ModelAdmin):
-    list_display = ['slug', 'created']
-    list_filter = ['created', 'serial']
-    search_fields = ['title', 'overview']
+    list_display = ['slug']
+    list_filter = ['serial']
+    search_fields = ['title']
     prepopulated_fields = {'slug': ('title',)}
     inlines = [EpisodeInline]
 

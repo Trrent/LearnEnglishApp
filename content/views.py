@@ -226,16 +226,16 @@ class SeasonDetailView(MultipleFieldLookupMixin,
     serializer_class = SeasonSerializer
     lookup_fields = ['serial_slug', 'season_slug']
 
-    # def create(self, request, *args, **kwargs):
-    #     seas = self.get_object()
-    #     request.data['serial'] = serial.id
-    #     if not request.data.get('episodes'):
-    #         request.data['episodes'] = []
-    #     season = EpisodeSerializer(data=request.data)
-    #     if season.is_valid():
-    #         season.save()
-    #         return Response(season.data, status=status.HTTP_200_OK)
-    #     return Response(season.errors, status=status.HTTP_400_BAD_REQUEST)
+    def create(self, request, *args, **kwargs):
+        season = self.get_object()
+        request.data['season'] = season.id
+        if not request.data.get('content'):
+            request.data['content'] = {}
+        episode = EpisodeSerializer(data=request.data, context={'request': request})
+        if episode.is_valid():
+            episode.save()
+            return Response(episode.data, status=status.HTTP_200_OK)
+        return Response(episode.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class SerialListView(generics.ListAPIView,
@@ -257,7 +257,7 @@ class SerialDetailView(MultipleFieldLookupMixin,
         request.data['serial'] = serial.id
         if not request.data.get('episodes'):
             request.data['episodes'] = []
-        season = SeasonSerializer(data=request.data)
+        season = SeasonSerializer(data=request.data, context={'data': request.data})
         if season.is_valid():
             season.save()
             return Response(season.data, status=status.HTTP_200_OK)

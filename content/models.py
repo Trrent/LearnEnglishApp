@@ -14,6 +14,7 @@ class Serial(models.Model):
     id = models.CharField(default=uuid.uuid4, primary_key=True, editable=False)
     title = models.CharField(max_length=180, blank=False, unique=True)
     slug = models.SlugField(max_length=200, blank=True)
+    overview = models.TextField()
 
     class Meta:
         ordering = ('title',)
@@ -31,11 +32,9 @@ class Season(models.Model):
     title = models.CharField(max_length=200)
     serial = models.ForeignKey(Serial, on_delete=models.CASCADE, related_name='seasons')
     slug = models.CharField(max_length=200, blank=True)
-    overview = models.TextField()
-    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ('-created',)
+        ordering = ('title',)
 
     def __str__(self):
         return f"{self.serial.title} {self.title}"
@@ -69,7 +68,7 @@ class ItemBase(models.Model):
 
 
 class Content(models.Model):
-    episode = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='contents')
+    episode = models.ForeignKey(Episode, on_delete=models.CASCADE, related_name='content')
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, limit_choices_to={'model__in': ('itext',
                                                                                                             'ivideo',
                                                                                                             'iquiz')})
