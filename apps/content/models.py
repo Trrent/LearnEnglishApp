@@ -98,7 +98,7 @@ class IVideo(ItemBase):
 class Video(models.Model):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
     quality = models.CharField(max_length=10)
-    src = models.URLField()
+    src = models.FileField(upload_to ='video/')
     iVideo = models.ForeignKey(IVideo, on_delete=models.CASCADE, related_name='qualitySrc')
 
 

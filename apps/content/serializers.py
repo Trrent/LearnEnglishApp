@@ -2,7 +2,6 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
 
-
 from .models import Serial, Season, Episode, IText, IVideo, IQuiz, Content
 
 
@@ -12,6 +11,12 @@ class ITextSerializer(serializers.ModelSerializer):
         fields = ['id', 'rus', 'eng']
 
 
+class IVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IVideo
+        fields = ['id', 'name', 'subtitle', 'poster', 'qualitySrc']
+
+
 class EpisodeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Episode
@@ -19,6 +24,10 @@ class EpisodeListSerializer(serializers.ModelSerializer):
 
 
 class EpisodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Episode
+        fields = ('id', 'title', 'slug', 'season')
+
     def create(self, validated_data):
         content = self.context['data'].pop('content', {})
         episode = Episode.objects.create(**validated_data)
@@ -27,13 +36,14 @@ class EpisodeSerializer(serializers.ModelSerializer):
                 if content_type == 'itext':
                     item = IText.objects.create(**content_data)
                 elif content_type == 'ivideo':
+                    
                     item = IVideo.objects.create(**content_data)
                 elif content_type == 'iquiz':
                     item = IQuiz.objects.create(**content_data)
                 Content.objects.create(
-                        episode=episode,
-                        content_type=ContentType.objects.get(model=content_type),
-                        object_id=item.id
+                    episode=episode,
+                    content_type=ContentType.objects.get(model=content_type),
+                    object_id=item.id
                 )
         return episode
 
@@ -51,10 +61,6 @@ class EpisodeSerializer(serializers.ModelSerializer):
                 data['content']['iquiz'] = data['content'].get('iquiz', []) + [ITextSerializer(content.item).data]
         return data
 
-    class Meta:
-        model = Episode
-        fields = ('id', 'title', 'slug', 'season')
-
 
 class SeasonListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,6 +69,10 @@ class SeasonListSerializer(serializers.ModelSerializer):
 
 
 class SeasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Season
+        fields = ('id', 'title', 'slug')
+
     def create(self, validated_data):
         episodes = self.context['data'].pop('episodes', [])
         season = Season.objects.create(**validated_data)
@@ -80,10 +90,6 @@ class SeasonSerializer(serializers.ModelSerializer):
             data['episodes'] = EpisodeListSerializer(self.instance.episodes.all(), many=True).data
         return data
 
-    class Meta:
-        model = Season
-        fields = ('id', 'title', 'slug', 'serial')
-
 
 class SerialListSerializer(serializers.ModelSerializer):
     class Meta:
@@ -92,12 +98,22 @@ class SerialListSerializer(serializers.ModelSerializer):
 
 
 class SerialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Serial
+        fields = ('id', 'title', 'slug')
+
+    def create(self, validated_data):
+        seasons = self.context['data'].pop('seasons', [])
+        serial = Serial.objects.create(**validated_data)
+        for season_data in seasons:
+            season_data['serial'] = serial.id
+            season = SeasonSerializer(data=season_data, context={'data': season_data})
+            if season.is_valid(raise_exception=True):
+                season.save()
+        return serial
+
     def to_representation(self, instance):
         data = super().to_representation(instance)
         if self.instance.seasons.all():
             data['seasons'] = SeasonListSerializer(self.instance.seasons.all(), many=True).data
         return data
-
-    class Meta:
-        model = Serial
-        fields = ('id', 'title', 'slug')
