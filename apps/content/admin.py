@@ -1,6 +1,9 @@
 from django.contrib import admin
 
-from .models import Serial, Season, Episode, Content, IText, IVideo, IQuiz
+from .models import Serial, Season, Episode, Content, IText, IVideo, IQuiz, Video
+
+
+admin.site.register(Video)
 
 
 @admin.register(Serial)
@@ -17,6 +20,10 @@ class EpisodeAdmin(admin.ModelAdmin):
 
 class EpisodeInline(admin.StackedInline):
     model = Episode
+
+
+class VideoInline(admin.StackedInline):
+    model = Video
 
 
 @admin.register(Season)
@@ -40,6 +47,7 @@ class ITextAdmin(admin.ModelAdmin):
 @admin.register(IVideo)
 class IVideoAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
+    inlines = [VideoInline]
 
 
 @admin.register(IQuiz)

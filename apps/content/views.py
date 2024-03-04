@@ -1,17 +1,15 @@
-from rest_framework import generics, viewsets
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.generics import get_object_or_404
 from rest_framework import authentication, permissions
 
 from django.utils.text import slugify
 
 
-from .models import Serial, Season, Episode
+from .models import Serial, Season, Episode, Video
 from .serializers import SerialSerializer, SeasonSerializer, EpisodeSerializer, SerialListSerializer, \
-    SeasonListSerializer
+    SeasonListSerializer, VideoSerializer, IVideoSerializer
 
 
 def get_object(model: [Serial, Season, Episode], **kwargs) -> [Serial, Season, Episode]:
@@ -24,12 +22,25 @@ def get_object(model: [Serial, Season, Episode], **kwargs) -> [Serial, Season, E
 
 
 class FileUploadView(APIView):
-    parser_classes = (FileUploadParser,)
+    parser_classes = (MultiPartParser,)
 
-    def put(self, request, filename, format=None):
-        file_obj = request.FILES['file']
-        # do some stuff with uploaded file
-        return Response(status=204)
+    def get(self, request, **kwargs):
+        video = Video.objects.all()
+        serializer = VideoSerializer(video, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, format=None):
+        poster = request.FILES.get('poster', None)
+        subtitles = request.data.get('subtitles', None)
+        serializer = IVideoSerializer(data={
+            'name': request.data['name'],
+            'subtitles': subtitles,
+            'poster': poster,
+        }, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class EpisodeDetailView(APIView):
@@ -104,7 +115,7 @@ class SerialListView(APIView):
 
     def get(self, request, **kwargs):
         serials = Serial.objects.all()
-        serializer = SerialListSerializer(serials)
+        serializer = SerialListSerializer(serials, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, **kwargs):
@@ -130,7 +141,6 @@ class SerialListView(APIView):
             serial.delete()
             return Response({'msg': 'content delete successfully'}, status=status.HTTP_204_NO_CONTENT)
         return Response({'msg': 'content not found'}, status=status.HTTP_404_NOT_FOUND)
-
 
 
 class SerialDetailView(APIView):
