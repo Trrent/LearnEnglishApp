@@ -28,9 +28,10 @@ DB_USER = os.environ['DB_USER']
 DB_PASSWORD = os.environ['DB_PASSWORD']
 DB_HOST = os.environ['DB_HOST']
 DB_PORT = os.environ['DB_PORT']
+DEBUG_MODE = os.environ['DEBUG_MODE']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = DEBUG_MODE
 
 ALLOWED_HOSTS = []
 
@@ -50,7 +51,7 @@ THIRD_PARTY = [
     'django_filters',
     'rest_framework_simplejwt',
     'rest_framework_swagger',
-    'versatileimagefield',
+    # 'versatileimagefield',
 ]
 
 LOCAL_APPS = [
@@ -122,7 +123,7 @@ SIMPLE_JWT = {
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1']
+ALLOWED_HOSTS = ['.vercel.app', '.now.sh', '127.0.0.1', 'localhost']
 
 AUTH_USER_MODEL = 'users.User'
 

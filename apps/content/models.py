@@ -4,9 +4,8 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils.text import slugify
-from versatileimagefield.fields import VersatileImageField, PPOIField
 
-from core.models import BaseModel, BaseImage
+from core.models import BaseModel
 
 import uuid
 
@@ -95,20 +94,10 @@ class IText(BaseModel):
 class IVideo(BaseModel):
     name = models.CharField(max_length=250)
     subtitles = models.CharField(blank=True)
-    poster = VersatileImageField(
-        'Poster',
-        upload_to=upload_to,
-        ppoi_field='poster_ppoi'
-    )
-    poster_ppoi = PPOIField()
-    # poster = models.FileField(upload_to=upload_to, blank=True, null=True)
+    poster = models.FileField(upload_to=upload_to, blank=True, null=True)
 
     def __str__(self):
         return f"IVideo (name: {self.name})"
-
-
-class IVideoPoster(BaseImage):
-    i_video = models.ForeignKey(IVideo, on_delete=models.CASCADE, null=True, blank=True)
 
 
 class Video(BaseModel):

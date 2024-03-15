@@ -1,30 +1,14 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from django.contrib.contenttypes.models import ContentType
-from versatileimagefield.serializers import VersatileImageFieldSerializer
 
-from .models import Serial, Season, Episode, IText, IVideo, IQuiz, Content, Video, IVideoPoster
+from .models import Serial, Season, Episode, IText, IVideo, IQuiz, Content, Video
 
 
 class ITextSerializer(serializers.ModelSerializer):
     class Meta:
         model = IText
         fields = ['id', 'rus', 'eng']
-
-
-class IVideoPosterSerializer(serializers.ModelSerializer):
-    poster = VersatileImageFieldSerializer(
-        sizes=[
-            ('full_size', 'url'),
-            ('thumbnail', 'thumbnail__100x100'),
-            ('medium_square_crop', 'crop__400x400'),
-            ('small_square_crop', 'crop__50x50')
-        ]
-    )
-
-    class Meta:
-        model = IVideoPoster
-        fields = '__all__'
 
 
 class VideoSerializer(serializers.ModelSerializer):
@@ -39,15 +23,6 @@ class VideoSerializer(serializers.ModelSerializer):
 
 
 class IVideoSerializer(serializers.ModelSerializer):
-    poster = VersatileImageFieldSerializer(
-        sizes=[
-            ('full_size', 'url'),
-            ('thumbnail', 'thumbnail__100x100'),
-            ('medium_square_crop', 'crop__400x400'),
-            ('small_square_crop', 'crop__50x50')
-        ]
-    )
-
     def create(self, validated_data):
         video = self.context['request'].FILES.get('video', None)
         quality = self.context['request'].data.get('quality', None)
